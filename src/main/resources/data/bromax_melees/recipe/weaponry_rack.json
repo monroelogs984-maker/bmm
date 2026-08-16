@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "IGI",
+    " L "
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "L": { "tag": "minecraft:logs" }
+  },
+  "result": {
+    "id": "bromax_melees:weaponry_rack",
+    "count": 1
+  }
+}
