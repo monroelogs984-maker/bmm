@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[43,)"
 license="Creative Commons 4.0"
 
 [[mods]]
@@ -11,13 +11,13 @@ license="Creative Commons 4.0"
 [[dependencies.bromax_melees]]
     modId="forge"
     mandatory=true
-    versionRange="[47,)"
+    versionRange="[43,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.bromax_melees]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.20.1,1.21)"
+    versionRange="[1.19.2,1.20)"
     ordering="NONE"
     side="BOTH"

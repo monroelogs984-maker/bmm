@@ -1,7 +1,6 @@
 package com.bromax.bromaxmelees;
 
 import com.bromax.bromaxmelees.compat.BHBCompat;
-import com.bromax.bromaxmelees.item.BMMCreativeTab;
 import com.bromax.bromaxmelees.item.BMMItems;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -16,7 +15,6 @@ public final class BromaxMelees {
     public BromaxMelees() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         BMMItems.ITEMS.register(bus);
-        BMMCreativeTab.TABS.register(bus);
         bus.addListener(this::setup);
     }
 

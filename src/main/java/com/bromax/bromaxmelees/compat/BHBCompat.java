@@ -21,7 +21,7 @@ import net.minecraft.world.item.Item;
  */
 public final class BHBCompat {
 
-    private static final String BHB_MOD_ID = "bromax_battle";
+    private static final String BHB_MOD_ID = "bromaxbattle";
 
     public static boolean isPresent() {
         return ModList.get().isLoaded(BHB_MOD_ID);

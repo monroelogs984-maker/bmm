@@ -30,7 +30,8 @@ public class BMMWeapon extends SwordItem implements IWeaponCategoryItem {
     }
 
     public BMMWeapon(WeaponCategory category, BMMTier tier) {
-        super(tier, 0, WeaponProfile.get(category).speed - 4.0f, new Properties());
+        super(tier, 0, WeaponProfile.get(category).speed - 4.0f,
+              new Properties().tab(BMMCreativeTab.TAB));
         this.category = category;
         this.bmmTier = tier;
     }

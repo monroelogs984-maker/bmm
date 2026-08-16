@@ -2,7 +2,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
-version = '1.0.0-1.20.1'
+version = '1.0.0-1.19.2'
 group = 'com.bromax.bromaxmelees'
 archivesBaseName = 'bromax_melees'
 
@@ -53,8 +53,8 @@ task deploy {
     doLast {
         copy {
             from "build/libs/${archivesBaseName}-${version}.jar"
-            into '/home/glenn/Documents/curseforge/minecraft/Instances/1.20.1 (1)/mods'
+            into '/home/glenn/Documents/curseforge/minecraft/Instances/1.19.2/mods'
         }
-        println "[DEPLOY] bromax_melees → 1.20.1 test instance"
+        println "[DEPLOY] bromax_melees → 1.19.2"
     }
 }

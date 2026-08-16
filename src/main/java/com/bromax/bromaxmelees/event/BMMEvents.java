@@ -90,7 +90,7 @@ public final class BMMEvents {
         Long expiry = HS_EXPIRY.get(entity.getUUID());
         if (expiry == null) return;
 
-        if (entity.level().getGameTime() >= expiry) {
+        if (entity.level.getGameTime() >= expiry) {
             AttributeInstance attr = entity.getAttribute(Attributes.MOVEMENT_SPEED);
             if (attr != null) attr.removeModifier(HS_UUID);
             HS_EXPIRY.remove(entity.getUUID());
@@ -158,7 +158,7 @@ public final class BMMEvents {
         attr.addTransientModifier(new AttributeModifier(
                 HS_UUID, "bmm:hard_strike", slow, AttributeModifier.Operation.MULTIPLY_TOTAL));
 
-        HS_EXPIRY.put(target.getUUID(), target.level().getGameTime() + durationTicks);
+        HS_EXPIRY.put(target.getUUID(), target.level.getGameTime() + durationTicks);
     }
 
     private static void applyRageful(LivingDamageEvent event, WeaponProfile profile,
