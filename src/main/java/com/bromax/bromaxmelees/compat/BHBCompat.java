@@ -3,10 +3,9 @@ package com.bromax.bromaxmelees.compat;
 import com.bromax.bromaxmelees.item.BMMItems;
 import com.bromax.bromaxmelees.weapon.WeaponCategory;
 import com.bromax.bromaxmelees.weapon.WeaponProfile;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.ModList;
-
-import java.util.List;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.item.Item;
 
 /**
  * Soft-depend BHB integration.
@@ -31,32 +30,18 @@ public final class BHBCompat {
     public static void register() {
         for (WeaponCategory category : WeaponCategory.values()) {
             var entry = BMMItems.byCategory(category);
-            if (entry == null) continue;
+            if (entry == null || !entry.iron.isPresent()) continue;
+            RegistryObject<? extends Item> obj = entry.iron;
 
             WeaponProfile profile = WeaponProfile.get(category);
 
-            // TODO: replace with actual BHB registration API call once the BHB
-            // 1.21.1 NeoForge port exposes one. Placeholder call structure:
+            // TODO: replace with actual BHB registration API call when BHB 1.19.2
+            // exposes one. Placeholder call structure shown below:
             //
             // int x = profile.hasVariantData() ? profile.variantX : 70;
             // float y = profile.hasVariantData() ? profile.variantY : 0.8f;
-            // BHBWeaponRegistry.register(entry.iron.get(), category.id(), x, y);
+            // BHBWeaponRegistry.register(obj.get(), category.id(), x, y);
         }
-    }
-
-    /**
-     * Returns BHB's live profile for any weapon stack. Only call after isPresent() == true.
-     * BHB classes are referenced only inside this method body so they load lazily — safe
-     * when BHB is absent because this method is never invoked in that case.
-     */
-    public static BHBProfile getProfile(ItemStack stack) {
-        var attrs = com.bromax.bromaxbattle.weapon.WeaponRegistry.INSTANCE.getAttributes(stack);
-        if (attrs == null || attrs.attacks.isEmpty()) return null;
-        List<BHBProfile.Attack> attacks = attrs.attacks.stream()
-                .map(a -> new BHBProfile.Attack(a.weight, a.speedMultiplier, a.damageMultiplier, a.hitDelay))
-                .toList();
-        String categoryName = attrs.category.name().toLowerCase().replace('_', ' ');
-        return new BHBProfile(categoryName, attacks, attrs.totalWeight);
     }
 
     private BHBCompat() {}

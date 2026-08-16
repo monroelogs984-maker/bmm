@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":["  S"," B ","S  "],"key":{"B":{"item":"minecraft:diamond_block"},"S":{"item":"minecraft:stick"}},"result":{"item":"bromax_melees:diamond_quarterstaff","count":1}}

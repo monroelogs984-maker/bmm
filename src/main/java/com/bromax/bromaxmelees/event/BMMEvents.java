@@ -5,7 +5,6 @@ import com.bromax.bromaxmelees.item.BMMWeapon;
 import com.bromax.bromaxmelees.weapon.IWeaponCategoryItem;
 import com.bromax.bromaxmelees.weapon.WeaponProfile;
 import com.bromax.bromaxmelees.weapon.WeaponTrait;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,37 +12,35 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@EventBusSubscriber(modid = BromaxMelees.MOD_ID)
+@Mod.EventBusSubscriber(modid = BromaxMelees.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class BMMEvents {
 
-    // AP: ThreadLocal passes the pierce bonus from LivingIncomingDamageEvent (pre-armor)
-    // to LivingDamageEvent.Pre (post-armor). Always reset at the start of every incoming
-    // event so stale values never bleed across unrelated attacks (e.g. when the hit is
-    // cancelled by a shield).
+    // AP: ThreadLocal passes the pierce bonus from LivingHurtEvent to LivingDamageEvent.
+    // Always reset at the start of every LivingHurtEvent so stale values never bleed
+    // across unrelated attacks (e.g. when the hurt event is cancelled by a shield).
     private static final ThreadLocal<Float> AP_PIERCE_BONUS = ThreadLocal.withInitial(() -> 0f);
 
-    // HS: single id for the transient movement speed modifier on any entity.
+    // HS: single UUID for the transient movement speed modifier on any entity.
     // Safe to reuse across entities — each entity has its own AttributeInstance.
-    private static final ResourceLocation HS_ID =
-            ResourceLocation.fromNamespaceAndPath(BromaxMelees.MOD_ID, "hard_strike");
+    private static final UUID HS_UUID = UUID.fromString("b8a7c3d1-4e2f-4a1b-9c3d-5f6e7a8b9c0d");
     private static final Map<UUID, Long> HS_EXPIRY = new HashMap<>();
 
     // -------------------------------------------------------------------------
-    // LivingIncomingDamageEvent — fires before armor reduction
+    // LivingHurtEvent — fires before armor reduction
     // -------------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onIncomingDamage(LivingIncomingDamageEvent event) {
+    public static void onLivingHurt(LivingHurtEvent event) {
         AP_PIERCE_BONUS.set(0f); // always clear so cancelled hits don't leak
 
         Entity attacker = event.getSource().getDirectEntity();
@@ -59,19 +56,19 @@ public final class BMMEvents {
     }
 
     // -------------------------------------------------------------------------
-    // LivingDamageEvent.Pre — fires after armor reduction, before HP is changed
+    // LivingDamageEvent — fires after armor reduction, before HP is changed
     // -------------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onLivingDamagePre(LivingDamageEvent.Pre event) {
-        // AP: inject pierce bonus computed in the incoming damage event
+    public static void onLivingDamage(LivingDamageEvent event) {
+        // AP: inject pierce bonus computed in LivingHurtEvent
         float pierceBonus = AP_PIERCE_BONUS.get();
         if (pierceBonus > 0f) {
-            event.setNewDamage(event.getNewDamage() + pierceBonus);
+            event.setAmount(event.getAmount() + pierceBonus);
             AP_PIERCE_BONUS.set(0f);
         }
 
-        Entity attacker = event.getContainer().getSource().getDirectEntity();
+        Entity attacker = event.getSource().getDirectEntity();
         if (!(attacker instanceof LivingEntity living)) return;
 
         ItemStack held = living.getMainHandItem();
@@ -84,18 +81,18 @@ public final class BMMEvents {
     }
 
     // -------------------------------------------------------------------------
-    // EntityTickEvent.Post — expires Hard Strike speed debuff
+    // LivingTickEvent — expires Hard Strike speed debuff
     // -------------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onEntityTick(EntityTickEvent.Post event) {
-        if (!(event.getEntity() instanceof LivingEntity entity)) return;
+    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
+        LivingEntity entity = event.getEntity();
         Long expiry = HS_EXPIRY.get(entity.getUUID());
         if (expiry == null) return;
 
         if (entity.level().getGameTime() >= expiry) {
             AttributeInstance attr = entity.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (attr != null) attr.removeModifier(HS_ID);
+            if (attr != null) attr.removeModifier(HS_UUID);
             HS_EXPIRY.remove(entity.getUUID());
         }
     }
@@ -104,7 +101,7 @@ public final class BMMEvents {
     // Trait implementations
     // -------------------------------------------------------------------------
 
-    private static void applyTwoHanded(LivingIncomingDamageEvent event, WeaponProfile profile,
+    private static void applyTwoHanded(LivingHurtEvent event, WeaponProfile profile,
                                         LivingEntity attacker) {
         int level = traitLevel(profile, WeaponTrait.TH);
         if (level == 0) return;
@@ -118,7 +115,7 @@ public final class BMMEvents {
         event.setAmount(event.getAmount() * multiplier);
     }
 
-    private static void computeArmorPierceBonus(LivingIncomingDamageEvent event, WeaponProfile profile) {
+    private static void computeArmorPierceBonus(LivingHurtEvent event, WeaponProfile profile) {
         int level = traitLevel(profile, WeaponTrait.AP);
         if (level == 0) return;
 
@@ -133,12 +130,12 @@ public final class BMMEvents {
         float armor = (float) target.getAttributeValue(Attributes.ARMOR);
         float toughness = (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
 
-        float postArmor = CombatRules.getDamageAfterAbsorb(target, rawDamage, event.getSource(), armor, toughness);
+        float postArmor = CombatRules.getDamageAfterAbsorb(rawDamage, armor, toughness);
         float blocked = rawDamage - postArmor;
         AP_PIERCE_BONUS.set(blocked * pierceFraction);
     }
 
-    private static void applyHardStrike(LivingDamageEvent.Pre event, WeaponProfile profile) {
+    private static void applyHardStrike(LivingDamageEvent event, WeaponProfile profile) {
         int level = traitLevel(profile, WeaponTrait.HS);
         if (level == 0) return;
 
@@ -157,14 +154,14 @@ public final class BMMEvents {
         AttributeInstance attr = target.getAttribute(Attributes.MOVEMENT_SPEED);
         if (attr == null) return;
 
-        attr.removeModifier(HS_ID); // clear any existing debuff before refreshing
+        attr.removeModifier(HS_UUID); // clear any existing debuff before refreshing
         attr.addTransientModifier(new AttributeModifier(
-                HS_ID, slow, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                HS_UUID, "bmm:hard_strike", slow, AttributeModifier.Operation.MULTIPLY_TOTAL));
 
         HS_EXPIRY.put(target.getUUID(), target.level().getGameTime() + durationTicks);
     }
 
-    private static void applyRageful(LivingDamageEvent.Pre event, WeaponProfile profile,
+    private static void applyRageful(LivingDamageEvent event, WeaponProfile profile,
                                       IWeaponCategoryItem weaponItem) {
         int level = traitLevel(profile, WeaponTrait.R);
         if (level == 0) return;
@@ -179,10 +176,10 @@ public final class BMMEvents {
                 ? bmmWeapon.effectiveDamage()
                 : profile.damage * profile.dpsModifier;
         float threshold = multiplier * effectiveDamage;
-        float remaining = event.getEntity().getHealth() - event.getNewDamage();
+        float remaining = event.getEntity().getHealth() - event.getAmount();
 
         if (remaining > 0f && remaining < threshold) {
-            event.setNewDamage(event.getEntity().getHealth());
+            event.setAmount(event.getEntity().getHealth());
         }
     }
 

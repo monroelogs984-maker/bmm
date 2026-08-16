@@ -1,74 +1,70 @@
 package com.bromax.bromaxmelees.item;
 
-import com.bromax.bromaxmelees.weapon.IBMMTier;
 import com.bromax.bromaxmelees.weapon.IWeaponCategoryItem;
 import com.bromax.bromaxmelees.weapon.WeaponCategory;
 import com.bromax.bromaxmelees.weapon.WeaponProfile;
-import net.minecraft.world.entity.EquipmentSlotGroup;
-import net.minecraft.world.entity.LivingEntity;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 /**
  * Base weapon item for all BMM weapons.
  * Stats are driven entirely by WeaponProfile — it is the single source of truth.
  *
- * Since 1.20.5, attack attributes live in the ITEM_ATTRIBUTE_MODIFIERS data
- * component, built once here from the exact float values in WeaponProfile
- * (the old int-precision SwordItem damage bonus is bypassed entirely).
+ * The SwordItem constructor takes int baseDamageBonus, which loses decimal precision.
+ * We pass 0 there and override getAttributeModifiers to inject the exact float values
+ * from WeaponProfile instead.
  */
 public class BMMWeapon extends SwordItem implements IWeaponCategoryItem {
 
     private final WeaponCategory category;
-    private final IBMMTier bmmTier;
+    private final BMMTier bmmTier;
 
     public BMMWeapon(WeaponCategory category) {
         this(category, BMMTier.IRON);
     }
 
-    public BMMWeapon(WeaponCategory category, IBMMTier tier) {
-        super(tier, new Properties().attributes(buildModifiers(category, tier)));
+    public BMMWeapon(WeaponCategory category, BMMTier tier) {
+        super(tier, 0, WeaponProfile.get(category).speed - 4.0f, new Properties());
         this.category = category;
         this.bmmTier = tier;
     }
 
     /** Effective attack damage for this tier: baseDps * dpsModifier / speed. */
-    public static float effectiveDamage(WeaponCategory category, IBMMTier tier) {
-        WeaponProfile profile = WeaponProfile.get(category);
-        return tier.getBaseDps() * profile.dpsModifier / profile.speed;
-    }
-
     public float effectiveDamage() {
-        return effectiveDamage(category, bmmTier);
+        WeaponProfile profile = WeaponProfile.get(category);
+        return bmmTier.getBaseDps() * profile.dpsModifier / profile.speed;
     }
 
-    public IBMMTier getBmmTier() { return bmmTier; }
+    public BMMTier getBmmTier() { return bmmTier; }
 
     @Override
-    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        boolean result = super.hurtEnemy(stack, target, attacker);
-        if (result && !attacker.level().isClientSide()) {
-            bmmTier.applyHitEffect(target, attacker);
-        }
-        return result;
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
+        return buildModifiers(slot);
     }
 
-    private static ItemAttributeModifiers buildModifiers(WeaponCategory category, IBMMTier tier) {
+    @Override
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
+        return buildModifiers(slot);
+    }
+
+    private Multimap<Attribute, AttributeModifier> buildModifiers(EquipmentSlot slot) {
+        if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
         WeaponProfile profile = WeaponProfile.get(category);
-        return ItemAttributeModifiers.builder()
-                .add(Attributes.ATTACK_DAMAGE, new AttributeModifier(
-                        BASE_ATTACK_DAMAGE_ID,
-                        effectiveDamage(category, tier) - 1.0,
-                        AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ATTACK_SPEED, new AttributeModifier(
-                        BASE_ATTACK_SPEED_ID,
+        return ImmutableMultimap.<Attribute, AttributeModifier>builder()
+                .put(Attributes.ATTACK_DAMAGE, new AttributeModifier(
+                        BASE_ATTACK_DAMAGE_UUID, "Weapon modifier",
+                        effectiveDamage() - 1.0,
+                        AttributeModifier.Operation.ADDITION))
+                .put(Attributes.ATTACK_SPEED, new AttributeModifier(
+                        BASE_ATTACK_SPEED_UUID, "Weapon modifier",
                         profile.speed - 4.0,
-                        AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
+                        AttributeModifier.Operation.ADDITION))
                 .build();
     }
 

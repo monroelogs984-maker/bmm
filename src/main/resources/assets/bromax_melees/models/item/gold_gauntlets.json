@@ -1,6 +1,0 @@
-{
-  "parent": "bromax_melees:item/bmm_handheld",
-  "textures": {
-    "layer0": "bromax_melees:item/gold_gauntlets"
-  }
-}

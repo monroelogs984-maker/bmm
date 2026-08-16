@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "side":   "bromax_melees:block/weaponry_rack_1",
-    "top":    "bromax_melees:block/weaponry_rack_2",
-    "bottom": "bromax_melees:block/weaponry_rack_3"
-  }
-}

@@ -1,11 +1,10 @@
 package com.bromax.bromaxmelees.item;
 
-import com.bromax.bromaxmelees.BromaxMelees;
 import com.bromax.bromaxmelees.weapon.WeaponCategory;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -13,7 +12,7 @@ import java.util.Map;
 public final class BMMItems {
 
     public static final DeferredRegister<Item> ITEMS =
-            DeferredRegister.create(net.minecraft.core.registries.Registries.ITEM, BromaxMelees.MOD_ID);
+            DeferredRegister.create(ForgeRegistries.ITEMS, "bromax_melees");
 
     private static final Map<WeaponCategory, WeaponEntry> BY_CATEGORY =
             new EnumMap<>(WeaponCategory.class);
@@ -69,17 +68,12 @@ public final class BMMItems {
     public static final WeaponEntry SAI                = entry(WeaponCategory.SAI);
     public static final WeaponEntry TWINBLADES         = entry(WeaponCategory.TWINBLADES);
 
-    // ---- Blocks ----
-    public static final DeferredHolder<Item, BlockItem> WEAPONRY_RACK =
-            ITEMS.register("weaponry_rack", () -> new BlockItem(BMMBlocks.WEAPONRY_RACK.get(), new Item.Properties()));
-
     private static WeaponEntry entry(WeaponCategory cat) {
         String id = cat.id();
-        DeferredHolder<Item, BMMWeapon> iron      = ITEMS.register(id,                () -> new BMMWeapon(cat, BMMTier.IRON));
-        DeferredHolder<Item, BMMWeapon> gold      = ITEMS.register("gold_"      + id, () -> new BMMWeapon(cat, BMMTier.GOLD));
-        DeferredHolder<Item, BMMWeapon> diamond   = ITEMS.register("diamond_"   + id, () -> new BMMWeapon(cat, BMMTier.DIAMOND));
-        DeferredHolder<Item, BMMWeapon> netherite = ITEMS.register("netherite_" + id, () -> new BMMWeapon(cat, BMMTier.NETHERITE));
-        WeaponEntry e = new WeaponEntry(iron, gold, diamond, netherite);
+        RegistryObject<BMMWeapon> iron      = ITEMS.register(id,               () -> new BMMWeapon(cat, BMMTier.IRON));
+        RegistryObject<BMMWeapon> diamond   = ITEMS.register("diamond_"   + id, () -> new BMMWeapon(cat, BMMTier.DIAMOND));
+        RegistryObject<BMMWeapon> netherite = ITEMS.register("netherite_" + id, () -> new BMMWeapon(cat, BMMTier.NETHERITE));
+        WeaponEntry e = new WeaponEntry(iron, diamond, netherite);
         BY_CATEGORY.put(cat, e);
         return e;
     }

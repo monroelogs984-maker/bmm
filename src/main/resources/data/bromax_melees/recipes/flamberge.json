@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":[" I ","IBI","MSM"],"key":{"I":{"item":"minecraft:iron_ingot"},"B":{"item":"minecraft:iron_block"},"S":{"item":"minecraft:stick"},"M":{"item":"minecraft:magma_cream"}},"result":{"item":"bromax_melees:flamberge","count":1}}

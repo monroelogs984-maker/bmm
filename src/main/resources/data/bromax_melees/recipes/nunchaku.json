@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":["  B"," C ","I  "],"key":{"I":{"item":"minecraft:iron_ingot"},"B":{"item":"minecraft:iron_block"},"C":{"item":"minecraft:chain"}},"result":{"item":"bromax_melees:nunchaku","count":1}}

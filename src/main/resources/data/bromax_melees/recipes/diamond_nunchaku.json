@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":["  B"," C ","D  "],"key":{"D":{"item":"minecraft:diamond"},"B":{"item":"minecraft:diamond_block"},"C":{"item":"minecraft:chain"}},"result":{"item":"bromax_melees:diamond_nunchaku","count":1}}

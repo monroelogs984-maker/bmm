@@ -1,7 +1,6 @@
 package com.bromax.bromaxmelees.item;
 
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.RegistryObject;
 
 /**
  * Groups all tier variants of one weapon category together.
@@ -9,25 +8,21 @@ import net.minecraft.world.item.Item;
  */
 public final class WeaponEntry {
 
-    public final DeferredHolder<Item, BMMWeapon> iron;
-    public final DeferredHolder<Item, BMMWeapon> gold;
-    public final DeferredHolder<Item, BMMWeapon> diamond;
-    public final DeferredHolder<Item, BMMWeapon> netherite;
+    public final RegistryObject<BMMWeapon> iron;
+    public final RegistryObject<BMMWeapon> diamond;
+    public final RegistryObject<BMMWeapon> netherite;
 
-    WeaponEntry(DeferredHolder<Item, BMMWeapon> iron,
-                DeferredHolder<Item, BMMWeapon> gold,
-                DeferredHolder<Item, BMMWeapon> diamond,
-                DeferredHolder<Item, BMMWeapon> netherite) {
+    WeaponEntry(RegistryObject<BMMWeapon> iron,
+                RegistryObject<BMMWeapon> diamond,
+                RegistryObject<BMMWeapon> netherite) {
         this.iron      = iron;
-        this.gold      = gold;
         this.diamond   = diamond;
         this.netherite = netherite;
     }
 
-    public DeferredHolder<Item, BMMWeapon> get(BMMTier tier) {
+    public RegistryObject<BMMWeapon> get(BMMTier tier) {
         return switch (tier) {
             case IRON      -> iron;
-            case GOLD      -> gold;
             case DIAMOND   -> diamond;
             case NETHERITE -> netherite;
         };

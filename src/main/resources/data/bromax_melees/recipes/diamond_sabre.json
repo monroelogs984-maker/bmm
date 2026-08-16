@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["  D", " B ", "S  "],
+  "key": {
+    "D": {"item": "minecraft:diamond"},
+    "B": {"item": "minecraft:diamond_block"},
+    "S": {"item": "minecraft:stick"}
+  },
+  "result": {"item": "bromax_melees:diamond_sabre", "count": 1}
+}

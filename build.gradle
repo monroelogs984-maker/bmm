@@ -1,31 +1,36 @@
 plugins {
-    id 'net.neoforged.gradle.userdev' version '7.1.38'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
-version = '1.2.2-1.21.1'
+version = '1.0.0-1.20.1'
 group = 'com.bromax.bromaxmelees'
+archivesBaseName = 'bromax_melees'
 
-base {
-    archivesName = 'bromax_melees'
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-}
+minecraft {
+    mappings channel: 'official', version: "${minecraft_version}"
 
-runs {
-    configureEach {
-        systemProperty 'neoforge.logging.markers', 'REGISTRIES'
-        systemProperty 'neoforge.logging.console.level', 'debug'
-        modSource project.sourceSets.main
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                bromax_melees { source sourceSets.main }
+            }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                bromax_melees { source sourceSets.main }
+            }
+        }
     }
-    client {}
-    server {}
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:21.1.233"
-    compileOnly files('/home/glenn/mc-modding/mod-dev/bhb-1211/build/libs/bromax_battle-1.3.7-Neoforge1.21.1.jar')
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 }
 
 jar {
@@ -41,24 +46,15 @@ jar {
     }
 }
 
-tasks.register('deploy', Copy) {
-    dependsOn build
-    from(layout.buildDirectory.dir('libs')) {
-        include "bromax_melees-*.jar"
-        exclude "*-sources.jar"
-    }
-    into '/home/glenn/Documents/curseforge/minecraft/Instances/S202 Neoforge/mods'
-}
+jar.finalizedBy('reobfJar')
 
-tasks.register('deployTest', Copy) {
+task deploy {
     dependsOn build
-    from(layout.buildDirectory.dir('libs')) {
-        include "bromax_melees-*.jar"
-        exclude "*-sources.jar"
+    doLast {
+        copy {
+            from "build/libs/${archivesBaseName}-${version}.jar"
+            into '/home/glenn/Documents/curseforge/minecraft/Instances/1.20.1 (1)/mods'
+        }
+        println "[DEPLOY] bromax_melees → 1.20.1 test instance"
     }
-    into '/home/glenn/Documents/curseforge/minecraft/Instances/1.21.1/mods'
 }
-
-// deploy pushes to both the S202 pack and the clean 1.21.1 test instance
-// so neither can end up with a stale jar
-deploy.finalizedBy deployTest

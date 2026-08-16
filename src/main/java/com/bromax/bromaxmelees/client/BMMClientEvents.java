@@ -6,14 +6,14 @@ import com.bromax.bromaxmelees.weapon.WeaponProfile;
 import com.bromax.bromaxmelees.weapon.WeaponTrait;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
 
-@EventBusSubscriber(modid = BromaxMelees.MOD_ID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = BromaxMelees.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public final class BMMClientEvents {
 
     @SubscribeEvent
